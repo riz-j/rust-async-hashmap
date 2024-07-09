@@ -64,7 +64,17 @@ async fn main() {
 
     calc.list_methods();
 
-    let result = calc.methods.get("multiply").unwrap().operate(25, 2).await;
+    let result = calc.methods.get("add").unwrap().operate(24, 2).await;
+    assert_eq!(result, 26);
 
-    println!("Result of calculation: {}", result);
+    let result = calc.methods.get("subtract").unwrap().operate(24, 2).await;
+    assert_eq!(result, 22);
+
+    let result = calc.methods.get("multiply").unwrap().operate(24, 2).await;
+    assert_eq!(result, 48);
+
+    let result = calc.methods.get("divide").unwrap().operate(24, 2).await;
+    assert_eq!(result, 12);
+
+    println!("Latest result of calculation: {}", result);
 }
