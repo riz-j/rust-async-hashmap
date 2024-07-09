@@ -2,7 +2,7 @@ use std::{collections::HashMap, future::Future, pin::Pin};
 
 // Define a trait MathOperation
 trait MathOperation {
-    fn operate(&self, a: i32, b: i32) -> Pin<Box<dyn Future<Output = i32> + Send>>;
+    fn invoke(&self, a: i32, b: i32) -> Pin<Box<dyn Future<Output = i32> + Send>>;
 }
 
 // Implement MathOperation for a generic function F
@@ -11,7 +11,7 @@ where
     F: Fn(i32, i32) -> Fut + Send + Sync + 'static,
     Fut: Future<Output = i32> + Send + 'static,
 {
-    fn operate(&self, a: i32, b: i32) -> Pin<Box<dyn Future<Output = i32> + Send>> {
+    fn invoke(&self, a: i32, b: i32) -> Pin<Box<dyn Future<Output = i32> + Send>> {
         Box::pin((self)(a, b))
     }
 }
@@ -28,6 +28,10 @@ impl Calculator {
     {
         self.methods
             .insert(method_name.to_string(), Box::new(method));
+    }
+
+    fn retrieve_method(&self, method_name: &str) -> &Box<dyn MathOperation> {
+        self.methods.get(method_name).unwrap()
     }
 
     fn list_methods(&self) {
@@ -64,16 +68,16 @@ async fn main() {
 
     calc.list_methods();
 
-    let result = calc.methods.get("add").unwrap().operate(24, 2).await;
+    let result = calc.retrieve_method("add").invoke(24, 2).await;
     assert_eq!(result, 26);
 
-    let result = calc.methods.get("subtract").unwrap().operate(24, 2).await;
+    let result = calc.retrieve_method("subtract").invoke(24, 2).await;
     assert_eq!(result, 22);
 
-    let result = calc.methods.get("multiply").unwrap().operate(24, 2).await;
+    let result = calc.retrieve_method("multiply").invoke(24, 2).await;
     assert_eq!(result, 48);
 
-    let result = calc.methods.get("divide").unwrap().operate(24, 2).await;
+    let result = calc.retrieve_method("divide").invoke(24, 2).await;
     assert_eq!(result, 12);
 
     println!("Latest result of calculation: {}", result);
