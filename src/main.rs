@@ -16,15 +16,6 @@ where
     }
 }
 
-// Define a function that we will use to implement the trait
-async fn add(a: i32, b: i32) -> i32 {
-    a + b
-}
-
-async fn multiply(a: i32, b: i32) -> i32 {
-    a * b
-}
-
 #[derive(Default)]
 struct Calculator {
     pub methods: HashMap<String, Box<dyn MathOperation>>,
@@ -46,20 +37,34 @@ impl Calculator {
     }
 }
 
+// Define a function that we will use to implement the trait
+async fn add(a: i32, b: i32) -> i32 {
+    a + b
+}
+
+async fn subtract(a: i32, b: i32) -> i32 {
+    a - b
+}
+
+async fn multiply(a: i32, b: i32) -> i32 {
+    a * b
+}
+
+async fn divide(a: i32, b: i32) -> i32 {
+    a / b
+}
+
 #[async_std::main]
 async fn main() {
-    let mut calculator = Calculator::default();
-    calculator.register("add", add);
-    calculator.register("multiply", multiply);
+    let mut calc = Calculator::default();
+    calc.register("add", add);
+    calc.register("subtract", subtract);
+    calc.register("multiply", multiply);
+    calc.register("divide", divide);
 
-    calculator.list_methods();
+    calc.list_methods();
 
-    let result = calculator
-        .methods
-        .get("multiply")
-        .unwrap()
-        .operate(25, 2)
-        .await;
+    let result = calc.methods.get("multiply").unwrap().operate(25, 2).await;
 
     println!("Result of calculation: {}", result);
 }
