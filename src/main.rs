@@ -1,26 +1,27 @@
-use std::{collections::HashMap, fmt};
+use std::{collections::HashMap, future::Future, pin::Pin};
 
 // Define a trait MathOperation
 trait MathOperation {
-    fn operate(&self, a: i32, b: i32) -> i32;
+    fn operate(&self, a: i32, b: i32) -> Pin<Box<dyn Future<Output = i32> + Send>>;
 }
 
 // Implement MathOperation for a generic function F
-impl<F> MathOperation for F
+impl<F, Fut> MathOperation for F
 where
-    F: Fn(i32, i32) -> i32, // F is a function that takes two i32 and returns an i32
+    F: Fn(i32, i32) -> Fut + Send + Sync + 'static,
+    Fut: Future<Output = i32> + Send + 'static,
 {
-    fn operate(&self, a: i32, b: i32) -> i32 {
-        self(a, b)
+    fn operate(&self, a: i32, b: i32) -> Pin<Box<dyn Future<Output = i32> + Send>> {
+        Box::pin((self)(a, b))
     }
 }
 
 // Define a function that we will use to implement the trait
-fn add(a: i32, b: i32) -> i32 {
+async fn add(a: i32, b: i32) -> i32 {
     a + b
 }
 
-fn multiply(a: i32, b: i32) -> i32 {
+async fn multiply(a: i32, b: i32) -> i32 {
     a * b
 }
 
@@ -45,14 +46,20 @@ impl Calculator {
     }
 }
 
-fn main() {
-    // Use the add function with the MathOperation trait
+#[async_std::main]
+async fn main() {
     let mut calculator = Calculator::default();
     calculator.register("add", add);
     calculator.register("multiply", multiply);
 
     calculator.list_methods();
 
-    let result = calculator.methods.get("multiply").unwrap().operate(25, 2);
-    println!("Result of addition: {}", result); // Output: "Result of addition: 7"
+    let result = calculator
+        .methods
+        .get("multiply")
+        .unwrap()
+        .operate(25, 2)
+        .await;
+
+    println!("Result of calculation: {}", result);
 }
