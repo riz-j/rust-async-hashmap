@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt};
 
 // Define a trait MathOperation
 trait MathOperation {
@@ -30,7 +30,7 @@ struct Calculator {
 }
 
 impl Calculator {
-    fn register<F>(mut self, method_name: &str, method: F) -> ()
+    fn register<F>(&mut self, method_name: &str, method: F) -> ()
     where
         F: MathOperation + 'static,
     {
@@ -38,28 +38,20 @@ impl Calculator {
             .insert(method_name.to_string(), Box::new(method));
     }
 
-    // fn list_methods(self) -> () {
-    //     println!("{:?}", self.methods);
-    // }
+    fn list_methods(&self) {
+        for (name, _) in &self.methods {
+            println!("{}", name);
+        }
+    }
 }
-
-// fn register<F>(function: F) -> i32
-// where
-//     F: MathOperation,
-// {
-//     let a = 25;
-//     let b = 52;
-
-//     function.operate(a, b)
-// }
 
 fn main() {
     // Use the add function with the MathOperation trait
     let mut calculator = Calculator::default();
     calculator.register("add", add);
-    // calculator.register("multiply", Box::new(multiply));
-    // register(add);
-    // register(multiply);
+    calculator.register("multiply", Box::new(multiply));
+
+    calculator.list_methods();
 
     let result = add.operate(3, 4);
     println!("Result of addition: {}", result); // Output: "Result of addition: 7"
