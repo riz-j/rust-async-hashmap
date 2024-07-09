@@ -49,10 +49,10 @@ fn main() {
     // Use the add function with the MathOperation trait
     let mut calculator = Calculator::default();
     calculator.register("add", add);
-    calculator.register("multiply", Box::new(multiply));
+    calculator.register("multiply", multiply);
 
     calculator.list_methods();
 
-    let result = add.operate(3, 4);
+    let result = calculator.methods.get("multiply").unwrap().operate(25, 2);
     println!("Result of addition: {}", result); // Output: "Result of addition: 7"
 }
