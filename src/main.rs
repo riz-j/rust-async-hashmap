@@ -1,4 +1,6 @@
-use std::{collections::HashMap, future::Future, pin::Pin};
+use std::collections::HashMap;
+use std::future::Future;
+use std::pin::Pin;
 
 // Define a trait MathOperation
 trait MathOperation {
@@ -8,8 +10,8 @@ trait MathOperation {
 // Implement MathOperation for a generic function F
 impl<F, Fut> MathOperation for F
 where
-    F: Fn(i32, i32) -> Fut + Send + Sync + 'static,
-    Fut: Future<Output = i32> + Send + 'static,
+    F: Fn(i32, i32) -> Fut,
+    Fut: Future<Output = i32> + Send + Sync + 'static,
 {
     fn operate(&self, a: i32, b: i32) -> Pin<Box<dyn Future<Output = i32> + Send>> {
         Box::pin((self)(a, b))
